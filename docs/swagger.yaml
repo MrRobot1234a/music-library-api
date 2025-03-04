@@ -1,0 +1,213 @@
+definitions:
+  models.Song:
+    properties:
+      created_at:
+        description: Дата создания записи
+        type: string
+      deleted_at:
+        description: Дата удаления (если soft delete)
+        type: string
+      group:
+        description: Группа
+        type: string
+      id:
+        description: ID песни (автоинкремент)
+        type: integer
+      link:
+        description: Ссылка
+        type: string
+      releaseDate:
+        description: Дата релиза
+        type: string
+      song:
+        description: Название песни
+        type: string
+      text:
+        description: Текст песни
+        type: string
+      updated_at:
+        description: Дата последнего обновления
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /songs:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список песен, поддерживает фильтрацию по группе, названию
+        и дате релиза
+      parameters:
+      - description: Фильтр по группе
+        in: query
+        name: group
+        type: string
+      - description: Фильтр по названию песни
+        in: query
+        name: song
+        type: string
+      - description: Фильтр по дате релиза
+        in: query
+        name: releaseDate
+        type: string
+      - default: 10
+        description: Лимит записей на страницу
+        in: query
+        name: limit
+        type: integer
+      - default: 1
+        description: Номер страницы
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Song'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить список песен
+      tags:
+      - Songs
+    post:
+      consumes:
+      - application/json
+      description: Добавляет песню в базу данных, запрашивая дополнительные данные
+        (текст, дата релиза, ссылка) из внешнего API
+      parameters:
+      - description: Новая песня (group и song обязательны)
+        in: body
+        name: song
+        required: true
+        schema:
+          $ref: '#/definitions/models.Song'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Song'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Добавить песню (с обогащением)
+      tags:
+      - Songs
+  /songs/{id}:
+    delete:
+      description: Удаляет песню из базы по её ID
+      parameters:
+      - description: ID песни
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Удалить песню
+      tags:
+      - Songs
+    put:
+      consumes:
+      - application/json
+      description: Обновляет информацию о песне по её ID
+      parameters:
+      - description: ID песни
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Обновлённые данные песни
+        in: body
+        name: song
+        required: true
+        schema:
+          $ref: '#/definitions/models.Song'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Song'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновить данные песни
+      tags:
+      - Songs
+  /songs/{id}/lyrics:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает определённый куплет песни (по номеру).
+      parameters:
+      - description: ID песни
+        in: path
+        name: id
+        required: true
+        type: integer
+      - default: 1
+        description: Номер куплета
+        in: query
+        name: verse
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить текст песни
+      tags:
+      - Songs
+swagger: "2.0"
